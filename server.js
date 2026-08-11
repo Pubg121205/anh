@@ -344,6 +344,155 @@ app.get(
 
     }
 );
+
+// =========================
+// PROFILE - UPDATE
+// =========================
+
+app.put(
+    "/api/profile",
+    auth,
+    async (req, res) => {
+
+        try {
+
+            const userId =
+                req.user.id;
+
+
+            const {
+                name,
+                phone,
+                email,
+                avatar,
+
+                cover,
+                area,
+                price_from,
+                styles,
+                bio,
+                phone_photo,
+                facebook,
+                instagram
+            } = req.body;
+
+
+            // =========================
+            // UPDATE USERS
+            // =========================
+
+            await pool.query(
+                `
+                UPDATE users
+                SET
+                    name = ?,
+                    phone = ?,
+                    email = ?,
+                    avatar = ?
+                WHERE id = ?
+                `,
+                [
+                    name || "",
+                    phone || "",
+                    email || "",
+                    avatar || "",
+                    userId
+                ]
+            );
+
+
+            // =========================
+            // KIỂM TRA PHOTOGRAPHER
+            // =========================
+
+            const [rows] =
+                await pool.query(
+                    `
+                    SELECT id
+                    FROM photographers
+                    WHERE user_id = ?
+                    LIMIT 1
+                    `,
+                    [userId]
+                );
+
+
+            if (rows.length > 0) {
+
+                // =========================
+                // UPDATE PHOTOGRAPHER
+                // =========================
+
+                await pool.query(
+                    `
+                    UPDATE photographers
+                    SET
+                        name = ?,
+                        avatar = ?,
+                        cover = ?,
+                        area = ?,
+                        price_from = ?,
+                        styles = ?,
+                        bio = ?,
+                        phone = ?,
+                        facebook = ?,
+                        instagram = ?
+                    WHERE user_id = ?
+                    `,
+                    [
+                        name || "",
+                        avatar || "",
+                        cover || "",
+                        area || "",
+                        Number(
+                            price_from || 0
+                        ),
+                        styles || "",
+                        bio || "",
+                        phone_photo || "",
+                        facebook || "",
+                        instagram || "",
+                        userId
+                    ]
+                );
+
+            }
+
+
+            res.json({
+
+                success: true,
+
+                message:
+                    "Cập nhật hồ sơ thành công"
+
+            });
+
+
+        } catch (error) {
+
+            console.error(
+                "UPDATE PROFILE ERROR:",
+                error
+            );
+
+
+            res.status(500).json({
+
+                success: false,
+
+                message:
+                    "Không thể cập nhật hồ sơ",
+
+                error:
+                    error.message
+
+            });
+
+        }
+
+    }
+);
 /* =========================
    AUTH
 ========================= */
