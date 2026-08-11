@@ -1,0 +1,1511 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta
+name="viewport"
+content="width=device-width,initial-scale=1"
+>
+
+<title>Admin - 27GRADUATION</title>
+
+<link
+rel="stylesheet"
+href="/style.css"
+>
+
+</head>
+
+<body>
+
+<header>
+
+<div class="nav">
+
+<div class="logo">
+27GRADUATION ADMIN
+</div>
+
+<div>
+
+<button
+class="button small-button"
+onclick="logout()"
+>
+Đăng xuất
+</button>
+
+</div>
+
+</div>
+
+</header>
+
+
+<main class="admin">
+
+<aside>
+
+<h3>
+QUẢN TRỊ
+</h3>
+
+<button
+onclick="showTab('dashboard')"
+>
+Dashboard
+</button>
+
+<button
+onclick="showTab('bookings')"
+>
+Khách đặt lịch
+</button>
+
+<button
+onclick="showTab('users')"
+>
+Nhân viên
+</button>
+
+<button
+onclick="showTab('photographers')"
+>
+Photographer
+</button>
+
+<button
+onclick="showTab('content')"
+>
+Nội dung website
+</button>
+
+</aside>
+
+
+<section class="admin-content">
+
+
+<!-- DASHBOARD -->
+
+<div
+id="dashboard"
+class="tab"
+>
+
+<h1>
+Dashboard
+</h1>
+
+<div class="stats">
+
+<div>
+<strong id="statBookings">
+0
+</strong>
+<span>Đặt lịch</span>
+</div>
+
+<div>
+<strong id="statUsers">
+0
+</strong>
+<span>Nhân viên</span>
+</div>
+
+<div>
+<strong id="statPhotographers">
+0
+</strong>
+<span>Photographer</span>
+</div>
+
+</div>
+
+</div>
+
+
+<!-- BOOKINGS -->
+
+<div
+id="bookings"
+class="tab hidden"
+>
+
+<div class="admin-title">
+
+<h1>
+Khách đặt lịch
+</h1>
+
+<button
+class="button"
+onclick="loadBookings()"
+>
+Làm mới
+</button>
+
+</div>
+
+<div class="table-wrapper">
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>ID</th>
+<th>Khách</th>
+<th>SĐT</th>
+<th>Khu vực</th>
+<th>Photographer</th>
+<th>Nội dung</th>
+<th>Trạng thái</th>
+<th></th>
+
+</tr>
+
+</thead>
+
+<tbody
+id="bookingTable"
+></tbody>
+
+</table>
+
+</div>
+
+</div>
+
+
+<!-- USERS -->
+
+<div
+id="users"
+class="tab hidden"
+>
+
+<div class="admin-title">
+
+<h1>
+Quản lý nhân viên
+</h1>
+
+<button
+class="button"
+onclick="openUserForm()"
+>
++ Thêm nhân viên
+</button>
+
+</div>
+
+<div class="table-wrapper">
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>ID</th>
+<th>Tài khoản</th>
+<th>Tên</th>
+<th>Quyền</th>
+<th>SĐT</th>
+<th></th>
+
+</tr>
+
+</thead>
+
+<tbody
+id="userTable"
+></tbody>
+
+</table>
+
+</div>
+
+</div>
+
+
+<!-- PHOTOGRAPHERS -->
+
+<div
+id="photographers"
+class="tab hidden"
+>
+
+<div class="admin-title">
+
+<h1>
+Quản lý Photographer
+</h1>
+
+<button
+class="button"
+onclick="openPhotographerForm()"
+>
++ Thêm
+</button>
+
+</div>
+
+<div
+id="photographerAdmin"
+class="admin-cards"
+></div>
+
+</div>
+
+
+<!-- CONTENT -->
+
+<div
+id="content"
+class="tab hidden"
+>
+
+<h1>
+Nội dung website
+</h1>
+
+<div
+id="contentForms"
+></div>
+
+</div>
+
+
+</section>
+
+</main>
+
+
+<!-- USER MODAL -->
+
+<div
+id="userModal"
+class="modal"
+>
+
+<div class="modal-box">
+
+<button
+class="close"
+onclick="closeModal('userModal')"
+>
+×
+</button>
+
+<h2 id="userFormTitle">
+Thêm nhân viên
+</h2>
+
+<form
+id="userForm"
+>
+
+<input
+type="hidden"
+name="id"
+>
+
+<input
+name="username"
+placeholder="Tài khoản"
+required
+>
+
+<input
+name="password"
+type="password"
+placeholder="Mật khẩu"
+>
+
+<input
+name="name"
+placeholder="Họ tên"
+required
+>
+
+<input
+name="phone"
+placeholder="Số điện thoại"
+>
+
+<input
+name="email"
+placeholder="Email"
+>
+
+<select name="role">
+
+<option value="photographer">
+Photographer
+</option>
+
+<option value="admin">
+Admin
+</option>
+
+</select>
+
+<input
+name="avatar"
+placeholder="URL avatar"
+>
+
+<button class="button">
+Lưu
+</button>
+
+</form>
+
+</div>
+
+</div>
+
+
+<!-- PHOTOGRAPHER MODAL -->
+
+<div
+id="photographerModal"
+class="modal"
+>
+
+<div class="modal-box large">
+
+<button
+class="close"
+onclick="closeModal('photographerModal')"
+>
+×
+</button>
+
+<h2>
+Photographer
+</h2>
+
+<form
+id="photographerForm"
+>
+
+<input
+type="hidden"
+name="id"
+>
+
+<input
+name="name"
+placeholder="Tên photographer"
+required
+>
+
+<input
+name="avatar"
+placeholder="URL ảnh đại diện"
+>
+
+<input
+name="cover"
+placeholder="URL ảnh cover"
+>
+
+<input
+name="area"
+placeholder="Khu vực"
+>
+
+<input
+name="rating"
+type="number"
+step="0.1"
+placeholder="Rating"
+>
+
+<input
+name="shoots"
+type="number"
+placeholder="Số buổi đã chụp"
+>
+
+<input
+name="price_from"
+type="number"
+placeholder="Giá từ"
+>
+
+<input
+name="styles"
+placeholder="Phong cách"
+>
+
+<textarea
+name="bio"
+placeholder="Giới thiệu"
+></textarea>
+
+<input
+name="phone"
+placeholder="Số điện thoại"
+>
+
+<input
+name="facebook"
+placeholder="Facebook"
+>
+
+<input
+name="instagram"
+placeholder="Instagram"
+>
+
+<label>
+
+<input
+type="checkbox"
+name="verified"
+>
+
+Đã kiểm duyệt
+
+</label>
+
+<button class="button">
+Lưu Photographer
+</button>
+
+</form>
+
+</div>
+
+</div>
+
+
+<script>
+
+/* =========================
+   AUTH
+========================= */
+
+const token =
+    localStorage.getItem(
+        "token"
+    );
+
+const user =
+    JSON.parse(
+        localStorage.getItem(
+            "user"
+        ) || "null"
+    );
+
+if (
+    !token ||
+    !user ||
+    user.role !== "admin"
+) {
+
+    location.href =
+        "/";
+
+}
+
+
+async function api(
+    url,
+    options = {}
+) {
+
+    const response =
+        await fetch(
+            "/api" + url,
+            {
+                ...options,
+
+                headers: {
+                    "Content-Type":
+                        "application/json",
+
+                    "Authorization":
+                        "Bearer " + token,
+
+                    ...(options.headers || {})
+                }
+            }
+        );
+
+    const data =
+        await response
+        .json()
+        .catch(() => ({}));
+
+    if (!response.ok) {
+
+        throw new Error(
+            data.message ||
+            "Có lỗi"
+        );
+    }
+
+    return data;
+}
+
+
+/* =========================
+   TABS
+========================= */
+
+function showTab(id) {
+
+    document
+    .querySelectorAll(".tab")
+    .forEach(
+        el =>
+            el.classList
+            .add("hidden")
+    );
+
+    document
+    .getElementById(id)
+    .classList
+    .remove("hidden");
+
+    if (
+        id ===
+        "dashboard"
+    )
+        loadDashboard();
+
+    if (
+        id ===
+        "bookings"
+    )
+        loadBookings();
+
+    if (
+        id ===
+        "users"
+    )
+        loadUsers();
+
+    if (
+        id ===
+        "photographers"
+    )
+        loadPhotographers();
+
+    if (
+        id ===
+        "content"
+    )
+        loadContent();
+}
+
+
+/* =========================
+   DASHBOARD
+========================= */
+
+async function loadDashboard() {
+
+    const [
+        bookings,
+        users,
+        photographers
+    ] = await Promise.all([
+
+        api("/admin/bookings"),
+
+        api("/admin/users"),
+
+        api("/photographers")
+
+    ]);
+
+    document
+    .getElementById(
+        "statBookings"
+    )
+    .textContent =
+        bookings.length;
+
+    document
+    .getElementById(
+        "statUsers"
+    )
+    .textContent =
+        users.length;
+
+    document
+    .getElementById(
+        "statPhotographers"
+    )
+    .textContent =
+        photographers.length;
+}
+
+
+/* =========================
+   BOOKINGS
+========================= */
+
+async function loadBookings() {
+
+    const data =
+        await api(
+            "/admin/bookings"
+        );
+
+    document
+    .getElementById(
+        "bookingTable"
+    )
+    .innerHTML =
+        data.map(b => `
+
+        <tr>
+
+        <td>${b.id}</td>
+
+        <td>
+        ${escapeHTML(
+            b.customer_name
+        )}
+        </td>
+
+        <td>
+        ${escapeHTML(
+            b.customer_phone
+        )}
+        </td>
+
+        <td>
+        ${escapeHTML(
+            b.area
+        )}
+        </td>
+
+        <td>
+        ${escapeHTML(
+            b.photographer_name ||
+            "Chưa chọn"
+        )}
+        </td>
+
+        <td>
+        ${escapeHTML(
+            b.message || ""
+        )}
+        </td>
+
+        <td>
+
+        <select
+        onchange="
+        changeBookingStatus(
+            ${b.id},
+            this.value
+        )
+        "
+        >
+
+        <option
+        value="new"
+        ${b.status === "new"
+        ? "selected"
+        : ""}
+        >
+        Mới
+        </option>
+
+        <option
+        value="contacted"
+        ${b.status === "contacted"
+        ? "selected"
+        : ""}
+        >
+        Đã liên hệ
+        </option>
+
+        <option
+        value="completed"
+        ${b.status === "completed"
+        ? "selected"
+        : ""}
+        >
+        Hoàn thành
+        </option>
+
+        <option
+        value="cancelled"
+        ${b.status === "cancelled"
+        ? "selected"
+        : ""}
+        >
+        Hủy
+        </option>
+
+        </select>
+
+        </td>
+
+        <td>
+
+        <button
+        class="danger"
+        onclick="
+        deleteBooking(${b.id})
+        "
+        >
+        Xóa
+        </button>
+
+        </td>
+
+        </tr>
+
+        `).join("");
+}
+
+
+async function changeBookingStatus(
+    id,
+    status
+) {
+
+    await api(
+        `/admin/bookings/${id}`,
+        {
+            method: "PUT",
+
+            body:
+                JSON.stringify({
+                    status
+                })
+        }
+    );
+}
+
+
+async function deleteBooking(id) {
+
+    if (
+        !confirm(
+            "Xóa yêu cầu này?"
+        )
+    )
+        return;
+
+    await api(
+        `/admin/bookings/${id}`,
+        {
+            method: "DELETE"
+        }
+    );
+
+    loadBookings();
+}
+
+
+/* =========================
+   USERS
+========================= */
+
+async function loadUsers() {
+
+    const data =
+        await api(
+            "/admin/users"
+        );
+
+    document
+    .getElementById(
+        "userTable"
+    )
+    .innerHTML =
+        data.map(u => `
+
+        <tr>
+
+        <td>${u.id}</td>
+
+        <td>
+        ${escapeHTML(
+            u.username
+        )}
+        </td>
+
+        <td>
+        ${escapeHTML(
+            u.name
+        )}
+        </td>
+
+        <td>
+        ${u.role}
+        </td>
+
+        <td>
+        ${escapeHTML(
+            u.phone || ""
+        )}
+        </td>
+
+        <td>
+
+        <button
+        onclick='editUser(
+            ${JSON.stringify(u)}
+        )'
+        >
+        Sửa
+        </button>
+
+        <button
+        class="danger"
+        onclick="
+        deleteUser(${u.id})
+        "
+        >
+        Xóa
+        </button>
+
+        </td>
+
+        </tr>
+
+        `).join("");
+}
+
+
+function openUserForm() {
+
+    document
+    .getElementById(
+        "userForm"
+    )
+    .reset();
+
+    document
+    .querySelector(
+        "#userForm [name=id]"
+    )
+    .value = "";
+
+    document
+    .getElementById(
+        "userFormTitle"
+    )
+    .textContent =
+        "Thêm nhân viên";
+
+    openModal(
+        "userModal"
+    );
+}
+
+
+function editUser(u) {
+
+    const form =
+        document
+        .getElementById(
+            "userForm"
+        );
+
+    form.id.value =
+        u.id;
+
+    form.username.value =
+        u.username;
+
+    form.name.value =
+        u.name || "";
+
+    form.phone.value =
+        u.phone || "";
+
+    form.email.value =
+        u.email || "";
+
+    form.role.value =
+        u.role;
+
+    form.avatar.value =
+        u.avatar || "";
+
+    form.password.value =
+        "";
+
+    document
+    .getElementById(
+        "userFormTitle"
+    )
+    .textContent =
+        "Sửa nhân viên";
+
+    openModal(
+        "userModal"
+    );
+}
+
+
+document
+.getElementById(
+    "userForm"
+)
+.addEventListener(
+    "submit",
+    async function(e) {
+
+        e.preventDefault();
+
+        const form =
+            e.target;
+
+        const data = {
+
+            username:
+                form.username.value,
+
+            password:
+                form.password.value,
+
+            name:
+                form.name.value,
+
+            phone:
+                form.phone.value,
+
+            email:
+                form.email.value,
+
+            role:
+                form.role.value,
+
+            avatar:
+                form.avatar.value
+        };
+
+        const id =
+            form.id.value;
+
+        if (id) {
+
+            await api(
+                `/admin/users/${id}`,
+                {
+                    method: "PUT",
+                    body:
+                        JSON.stringify(
+                            data
+                        )
+                }
+            );
+
+        } else {
+
+            await api(
+                "/admin/users",
+                {
+                    method: "POST",
+                    body:
+                        JSON.stringify(
+                            data
+                        )
+                }
+            );
+        }
+
+        closeModal(
+            "userModal"
+        );
+
+        loadUsers();
+    }
+);
+
+
+async function deleteUser(id) {
+
+    if (
+        !confirm(
+            "Xóa tài khoản này?"
+        )
+    )
+        return;
+
+    await api(
+        `/admin/users/${id}`,
+        {
+            method: "DELETE"
+        }
+    );
+
+    loadUsers();
+}
+
+
+/* =========================
+   PHOTOGRAPHERS
+========================= */
+
+async function loadPhotographers() {
+
+    const data =
+        await api(
+            "/photographers"
+        );
+
+    document
+    .getElementById(
+        "photographerAdmin"
+    )
+    .innerHTML =
+        data.map(p => `
+
+        <div class="admin-card">
+
+        <img
+        src="${p.avatar || ""}"
+        >
+
+        <div>
+
+        <h3>
+        ${escapeHTML(p.name)}
+        </h3>
+
+        <p>
+        ${escapeHTML(
+            p.area || ""
+        )}
+        </p>
+
+        <p>
+        ★ ${p.rating}
+        · ${p.shoots} buổi
+        </p>
+
+        <strong>
+        ${money(p.price_from)}
+        </strong>
+
+        <div>
+
+        <button
+        onclick='editPhotographer(
+            ${JSON.stringify(p)}
+        )'
+        >
+        Sửa
+        </button>
+
+        <button
+        class="danger"
+        onclick="
+        deletePhotographer(
+            ${p.id}
+        )
+        "
+        >
+        Xóa
+        </button>
+
+        </div>
+
+        </div>
+
+        </div>
+
+        `).join("");
+}
+
+
+function openPhotographerForm() {
+
+    const form =
+        document
+        .getElementById(
+            "photographerForm"
+        );
+
+    form.reset();
+
+    form.id.value = "";
+
+    openModal(
+        "photographerModal"
+    );
+}
+
+
+function editPhotographer(p) {
+
+    const form =
+        document
+        .getElementById(
+            "photographerForm"
+        );
+
+    form.id.value =
+        p.id;
+
+    form.name.value =
+        p.name || "";
+
+    form.avatar.value =
+        p.avatar || "";
+
+    form.cover.value =
+        p.cover || "";
+
+    form.area.value =
+        p.area || "";
+
+    form.rating.value =
+        p.rating || 5;
+
+    form.shoots.value =
+        p.shoots || 0;
+
+    form.price_from.value =
+        p.price_from || 0;
+
+    form.styles.value =
+        p.styles || "";
+
+    form.bio.value =
+        p.bio || "";
+
+    form.phone.value =
+        p.phone || "";
+
+    form.facebook.value =
+        p.facebook || "";
+
+    form.instagram.value =
+        p.instagram || "";
+
+    form.verified.checked =
+        !!p.verified;
+
+    openModal(
+        "photographerModal"
+    );
+}
+
+
+document
+.getElementById(
+    "photographerForm"
+)
+.addEventListener(
+    "submit",
+    async function(e) {
+
+        e.preventDefault();
+
+        const f =
+            e.target;
+
+        const data = {
+
+            name:
+                f.name.value,
+
+            avatar:
+                f.avatar.value,
+
+            cover:
+                f.cover.value,
+
+            area:
+                f.area.value,
+
+            rating:
+                Number(
+                    f.rating.value
+                ),
+
+            shoots:
+                Number(
+                    f.shoots.value
+                ),
+
+            price_from:
+                Number(
+                    f.price_from.value
+                ),
+
+            styles:
+                f.styles.value,
+
+            bio:
+                f.bio.value,
+
+            phone:
+                f.phone.value,
+
+            facebook:
+                f.facebook.value,
+
+            instagram:
+                f.instagram.value,
+
+            verified:
+                f.verified.checked
+        };
+
+        const id =
+            f.id.value;
+
+        if (id) {
+
+            await api(
+                `/admin/photographers/${id}`,
+                {
+                    method: "PUT",
+                    body:
+                        JSON.stringify(
+                            data
+                        )
+                }
+            );
+
+        } else {
+
+            await api(
+                "/admin/photographers",
+                {
+                    method: "POST",
+                    body:
+                        JSON.stringify(
+                            data
+                        )
+                }
+            );
+        }
+
+        closeModal(
+            "photographerModal"
+        );
+
+        loadPhotographers();
+    }
+);
+
+
+async function deletePhotographer(id) {
+
+    if (
+        !confirm(
+            "Xóa photographer này?"
+        )
+    )
+        return;
+
+    await api(
+        `/admin/photographers/${id}`,
+        {
+            method: "DELETE"
+        }
+    );
+
+    loadPhotographers();
+}
+
+
+/* =========================
+   CONTENT
+========================= */
+
+async function loadContent() {
+
+    const data =
+        await api(
+            "/content"
+        );
+
+    document
+    .getElementById(
+        "contentForms"
+    )
+    .innerHTML =
+        data.map(c => `
+
+        <div class="content-editor">
+
+        <h2>
+        ${escapeHTML(
+            c.title
+        )}
+        </h2>
+
+        <input
+        id="title-${c.section}"
+        value="${escapeAttribute(
+            c.title
+        )}"
+        >
+
+        <textarea
+        id="text-${c.section}"
+        >${escapeHTML(
+            c.content
+        )}</textarea>
+
+        <input
+        id="image-${c.section}"
+        value="${escapeAttribute(
+            c.image || ""
+        )}"
+        placeholder="URL hình ảnh"
+        >
+
+        <button
+        class="button"
+        onclick="
+        saveContent(
+            '${c.section}'
+        )
+        "
+        >
+        Lưu
+        </button>
+
+        </div>
+
+        `).join("");
+}
+
+
+async function saveContent(section) {
+
+    await api(
+        `/admin/content/${section}`,
+        {
+            method: "PUT",
+
+            body:
+                JSON.stringify({
+
+                    title:
+                        document
+                        .getElementById(
+                            `title-${section}`
+                        )
+                        .value,
+
+                    content:
+                        document
+                        .getElementById(
+                            `text-${section}`
+                        )
+                        .value,
+
+                    image:
+                        document
+                        .getElementById(
+                            `image-${section}`
+                        )
+                        .value
+
+                })
+        }
+    );
+
+    alert(
+        "Đã lưu nội dung"
+    );
+}
+
+
+/* =========================
+   UTIL
+========================= */
+
+function openModal(id) {
+
+    document
+    .getElementById(id)
+    .classList
+    .add("show");
+}
+
+
+function closeModal(id) {
+
+    document
+    .getElementById(id)
+    .classList
+    .remove("show");
+}
+
+
+function money(n) {
+
+    return Number(
+        n || 0
+    ).toLocaleString(
+        "vi-VN"
+    ) + " ₫";
+}
+
+
+function escapeHTML(v) {
+
+    return String(
+        v || ""
+    )
+    .replace(
+        /[&<>"']/g,
+        c => ({
+            "&":"&amp;",
+            "<":"&lt;",
+            ">":"&gt;",
+            '"':"&quot;",
+            "'":"&#039;"
+        })[c]
+    );
+}
+
+
+function escapeAttribute(v) {
+
+    return escapeHTML(v);
+}
+
+
+function logout() {
+
+    localStorage.removeItem(
+        "token"
+    );
+
+    localStorage.removeItem(
+        "user"
+    );
+
+    location.href = "/";
+}
+
+
+/* =========================
+   START
+========================= */
+
+loadDashboard();
+
+</script>
+
+</body>
+
+</html>

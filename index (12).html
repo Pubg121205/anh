@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta
+name="viewport"
+content="width=device-width,initial-scale=1"
+>
+
+<title>27GRADUATION</title>
+
+<link
+rel="stylesheet"
+href="/style.css"
+>
+
+</head>
+
+<body>
+
+<header>
+
+<div class="nav">
+
+<a
+class="logo"
+href="/"
+>
+27GRADUATION
+</a>
+
+<div class="nav-links">
+
+<a href="#photographers">
+Photographer
+</a>
+
+<a href="#explore">
+Khám phá ảnh
+</a>
+
+<a href="#booking">
+Hướng dẫn đặt lịch
+</a>
+
+<a href="#protection">
+Bảo vệ khách
+</a>
+
+<a
+href="#"
+onclick="openLogin()"
+>
+Nhân viên
+</a>
+
+</div>
+
+</div>
+
+</header>
+
+
+<section class="hero">
+
+<div class="hero-content">
+
+<div class="small">
+27GRADUATION PHOTOGRAPHER
+</div>
+
+<h1>
+Tìm người kể lại
+<br>
+câu chuyện của bạn.
+</h1>
+
+<p>
+Khám phá những photographer
+phù hợp cho ngày tốt nghiệp
+và những khoảnh khắc đáng nhớ.
+</p>
+
+<a
+href="#photographers"
+class="button"
+>
+Khám phá photographer
+</a>
+
+</div>
+
+</section>
+
+
+<section
+class="section"
+id="photographers"
+>
+
+<div class="section-head">
+
+<div>
+
+<div class="small">
+OUR PHOTOGRAPHERS
+</div>
+
+<h2>
+Photographer nổi bật
+</h2>
+
+</div>
+
+</div>
+
+
+<div class="search">
+
+<input
+id="search"
+placeholder="Tìm theo tên hoặc phong cách..."
+>
+
+<input
+id="area"
+placeholder="Khu vực..."
+>
+
+<button
+onclick="loadPhotographers()"
+>
+Tìm kiếm
+</button>
+
+</div>
+
+
+<div
+id="photographerList"
+class="cards"
+></div>
+
+</section>
+
+
+<section
+class="dark-section"
+id="explore"
+>
+
+<div class="section">
+
+<div class="small">
+EXPLORE
+</div>
+
+<h2 id="exploreTitle">
+Khám phá ảnh
+</h2>
+
+<p id="exploreContent"></p>
+
+</div>
+
+</section>
+
+
+<section
+class="section"
+id="booking"
+>
+
+<div class="small">
+HOW IT WORKS
+</div>
+
+<h2 id="bookingTitle">
+Hướng dẫn đặt lịch
+</h2>
+
+<p id="bookingContent"></p>
+
+<div class="steps">
+
+<div>
+<strong>01</strong>
+<h3>Chọn photographer</h3>
+<p>
+Xem phong cách và thông tin
+của từng photographer.
+</p>
+</div>
+
+<div>
+<strong>02</strong>
+<h3>Gửi yêu cầu</h3>
+<p>
+Điền tên, số điện thoại
+và khu vực.
+</p>
+</div>
+
+<div>
+<strong>03</strong>
+<h3>Xác nhận</h3>
+<p>
+Nhân viên sẽ liên hệ lại
+để xác nhận lịch.
+</p>
+</div>
+
+</div>
+
+</section>
+
+
+<section
+class="dark-section"
+id="protection"
+>
+
+<div class="section">
+
+<div class="small">
+CUSTOMER PROTECTION
+</div>
+
+<h2 id="protectionTitle">
+Bảo vệ khách
+</h2>
+
+<p id="protectionContent"></p>
+
+</div>
+
+</section>
+
+
+<!-- DETAIL MODAL -->
+
+<div
+id="detailModal"
+class="modal"
+>
+
+<div class="modal-box">
+
+<button
+class="close"
+onclick="closeModal('detailModal')"
+>
+×
+</button>
+
+<img
+id="detailAvatar"
+class="detail-image"
+>
+
+<h2 id="detailName"></h2>
+
+<p id="detailArea"></p>
+
+<p id="detailBio"></p>
+
+<div id="detailPrice"></div>
+
+<button
+class="button"
+onclick="openBooking()"
+>
+Thuê / Liên hệ
+</button>
+
+</div>
+
+</div>
+
+
+<!-- BOOKING MODAL -->
+
+<div
+id="bookingModal"
+class="modal"
+>
+
+<div class="modal-box">
+
+<button
+class="close"
+onclick="closeModal('bookingModal')"
+>
+×
+</button>
+
+<h2>
+Đặt lịch / Liên hệ
+</h2>
+
+<form
+id="bookingForm"
+>
+
+<input
+name="name"
+placeholder="Họ và tên"
+required
+>
+
+<input
+name="phone"
+placeholder="Số điện thoại"
+required
+>
+
+<input
+name="area"
+placeholder="Khu vực"
+required
+>
+
+<textarea
+name="message"
+placeholder="Nội dung cần trao đổi"
+></textarea>
+
+<button
+class="button"
+type="submit"
+>
+Gửi yêu cầu
+</button>
+
+</form>
+
+</div>
+
+</div>
+
+
+<!-- LOGIN -->
+
+<div
+id="loginModal"
+class="modal"
+>
+
+<div class="modal-box">
+
+<button
+class="close"
+onclick="closeModal('loginModal')"
+>
+×
+</button>
+
+<h2>
+Đăng nhập nhân viên
+</h2>
+
+<form
+id="loginForm"
+>
+
+<input
+name="username"
+placeholder="Tài khoản"
+required
+>
+
+<input
+name="password"
+type="password"
+placeholder="Mật khẩu"
+required
+>
+
+<button
+class="button"
+>
+Đăng nhập
+</button>
+
+<div
+id="loginMessage"
+class="error"
+></div>
+
+</form>
+
+</div>
+
+</div>
+
+
+<script>
+
+let selectedPhotographer = null;
+
+
+/* =====================
+   API
+===================== */
+
+async function api(
+    url,
+    options = {}
+) {
+
+    const response =
+        await fetch(
+            "/api" + url,
+            {
+                ...options,
+
+                headers: {
+                    "Content-Type":
+                        "application/json",
+
+                    ...(options.headers || {})
+                }
+            }
+        );
+
+    const data =
+        await response
+            .json()
+            .catch(() => ({}));
+
+    if (!response.ok) {
+
+        throw new Error(
+            data.message ||
+            "Có lỗi xảy ra"
+        );
+    }
+
+    return data;
+}
+
+
+/* =====================
+   PHOTOGRAPHERS
+===================== */
+
+async function loadPhotographers() {
+
+    const q =
+        document
+        .getElementById("search")
+        .value;
+
+    const area =
+        document
+        .getElementById("area")
+        .value;
+
+    const list =
+        document
+        .getElementById(
+            "photographerList"
+        );
+
+    list.innerHTML =
+        "<p>Đang tải...</p>";
+
+    try {
+
+        const data =
+            await api(
+                `/photographers?q=${encodeURIComponent(q)}&area=${encodeURIComponent(area)}`
+            );
+
+        if (!data.length) {
+
+            list.innerHTML =
+                "<p>Không tìm thấy photographer.</p>";
+
+            return;
+        }
+
+        list.innerHTML =
+            data.map(p => `
+
+            <article
+            class="card"
+            onclick="showPhotographer(${p.id})"
+            >
+
+                <img
+                src="${p.avatar || ''}"
+                >
+
+                <div class="card-info">
+
+                    ${
+                        p.verified
+                        ?
+                        `<span class="verified">
+                        ✓ ĐÃ KIỂM DUYỆT
+                        </span>`
+                        :
+                        ""
+                    }
+
+                    <h3>
+                    ${escapeHTML(p.name)}
+                    </h3>
+
+                    <p>
+                    ${escapeHTML(p.area || "")}
+                    </p>
+
+                    <p>
+                    ★ ${p.rating}
+                    · ${p.shoots} buổi
+                    </p>
+
+                    <p>
+                    ${escapeHTML(p.styles || "")}
+                    </p>
+
+                    <strong>
+                    Từ ${money(p.price_from)}
+                    </strong>
+
+                </div>
+
+            </article>
+
+            `).join("");
+
+    } catch (error) {
+
+        list.innerHTML =
+            `<p class="error">
+            ${escapeHTML(
+                error.message
+            )}
+            </p>`;
+    }
+}
+
+
+/* =====================
+   DETAIL
+===================== */
+
+async function showPhotographer(id) {
+
+    try {
+
+        const p =
+            await api(
+                `/photographers/${id}`
+            );
+
+        selectedPhotographer =
+            p;
+
+        document
+        .getElementById(
+            "detailAvatar"
+        )
+        .src =
+            p.avatar || "";
+
+        document
+        .getElementById(
+            "detailName"
+        )
+        .textContent =
+            p.name;
+
+        document
+        .getElementById(
+            "detailArea"
+        )
+        .textContent =
+            `${p.area || ""} · ★ ${p.rating}`;
+
+        document
+        .getElementById(
+            "detailBio"
+        )
+        .textContent =
+            p.bio || "";
+
+        document
+        .getElementById(
+            "detailPrice"
+        )
+        .textContent =
+            `Từ ${money(p.price_from)}`;
+
+        openModal(
+            "detailModal"
+        );
+
+    } catch (error) {
+
+        alert(
+            error.message
+        );
+    }
+}
+
+
+/* =====================
+   BOOKING
+===================== */
+
+document
+.getElementById("bookingForm")
+.addEventListener(
+    "submit",
+    async function(e) {
+
+        e.preventDefault();
+
+        const form = e.target;
+
+        try {
+
+            await api(
+                "/bookings",
+                {
+                    method: "POST",
+
+                    body:
+                        JSON.stringify({
+
+                            photographer_id:
+                                selectedPhotographer
+                                ?.id || null,
+
+                            customer_name:
+                                form.name.value,
+
+                            customer_phone:
+                                form.phone.value,
+
+                            area:
+                                form.area.value,
+
+                            message:
+                                form.message.value
+                        })
+                }
+            );
+
+            alert(
+                "Đã gửi yêu cầu thành công!"
+            );
+
+            form.reset();
+
+            closeModal(
+                "bookingModal"
+            );
+
+        } catch (error) {
+
+            alert(
+                error.message
+            );
+        }
+    }
+);
+
+
+function openBooking() {
+
+    closeModal(
+        "detailModal"
+    );
+
+    openModal(
+        "bookingModal"
+    );
+}
+
+
+/* =====================
+   CONTENT
+===================== */
+
+async function loadContent() {
+
+    try {
+
+        const data =
+            await api(
+                "/content"
+            );
+
+        data.forEach(c => {
+
+            if (
+                c.section ===
+                "explore"
+            ) {
+
+                document
+                .getElementById(
+                    "exploreTitle"
+                )
+                .textContent =
+                    c.title;
+
+                document
+                .getElementById(
+                    "exploreContent"
+                )
+                .textContent =
+                    c.content;
+            }
+
+            if (
+                c.section ===
+                "booking"
+            ) {
+
+                document
+                .getElementById(
+                    "bookingTitle"
+                )
+                .textContent =
+                    c.title;
+
+                document
+                .getElementById(
+                    "bookingContent"
+                )
+                .textContent =
+                    c.content;
+            }
+
+            if (
+                c.section ===
+                "protection"
+            ) {
+
+                document
+                .getElementById(
+                    "protectionTitle"
+                )
+                .textContent =
+                    c.title;
+
+                document
+                .getElementById(
+                    "protectionContent"
+                )
+                .textContent =
+                    c.content;
+            }
+
+        });
+
+    } catch(error) {
+
+        console.error(error);
+    }
+}
+
+
+/* =====================
+   LOGIN
+===================== */
+
+document
+.getElementById("loginForm")
+.addEventListener(
+    "submit",
+    async function(e) {
+
+        e.preventDefault();
+
+        const form = e.target;
+
+        const message =
+            document
+            .getElementById(
+                "loginMessage"
+            );
+
+        try {
+
+            const data =
+                await api(
+                    "/login",
+                    {
+                        method: "POST",
+
+                        body:
+                            JSON.stringify({
+                                username:
+                                    form.username.value,
+
+                                password:
+                                    form.password.value
+                            })
+                    }
+                );
+
+            localStorage.setItem(
+                "token",
+                data.token
+            );
+
+            localStorage.setItem(
+                "user",
+                JSON.stringify(
+                    data.user
+                )
+            );
+
+            if (
+                data.user.role ===
+                "admin"
+            ) {
+
+                location.href =
+                    "/admin.html";
+
+            } else {
+
+                alert(
+                    "Đăng nhập photographer thành công"
+                );
+
+                closeModal(
+                    "loginModal"
+                );
+            }
+
+        } catch(error) {
+
+            message.textContent =
+                error.message;
+        }
+    }
+);
+
+
+function openLogin() {
+
+    openModal(
+        "loginModal"
+    );
+}
+
+
+/* =====================
+   MODAL
+===================== */
+
+function openModal(id) {
+
+    document
+    .getElementById(id)
+    .classList
+    .add("show");
+}
+
+
+function closeModal(id) {
+
+    document
+    .getElementById(id)
+    .classList
+    .remove("show");
+}
+
+
+/* =====================
+   UTILS
+===================== */
+
+function money(value) {
+
+    return Number(
+        value || 0
+    ).toLocaleString(
+        "vi-VN"
+    ) + " ₫";
+}
+
+
+function escapeHTML(value) {
+
+    return String(value || "")
+        .replace(
+            /[&<>"']/g,
+            c => ({
+                "&":"&amp;",
+                "<":"&lt;",
+                ">":"&gt;",
+                '"':"&quot;",
+                "'":"&#039;"
+            })[c]
+        );
+}
+
+
+/* =====================
+   START
+===================== */
+
+loadPhotographers();
+
+loadContent();
+
+</script>
+<script src="/script.js"></script>
+</body>
+</html>
