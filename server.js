@@ -701,44 +701,99 @@ app.post(
    GET PHOTOGRAPHERS
 ========================= */
 app.get("/api/photographers", async (req, res) => {
+
     try {
-        const [rows] = await pool.query(`
+
+        const q =
+            String(req.query.q || "").trim();
+
+        const area =
+            String(req.query.area || "").trim();
+
+        let sql = `
             SELECT
                 p.id,
                 p.user_id,
                 p.name,
                 p.avatar,
+                p.cover,
                 p.area,
                 p.rating,
                 p.shoots,
-                p.styles,
                 p.price_from,
+                p.styles,
+                p.bio,
+                p.phone,
+                p.facebook,
+                p.instagram,
                 p.verified
             FROM photographers p
-            INNER JOIN users u
-                ON p.user_id = u.id
-            WHERE u.role = 'photographer'
-            ORDER BY p.id DESC
-        `);
+            WHERE 1 = 1
+        `;
 
-        res.json({
-            success: true,
-            photographers: rows
-        });
+        const params = [];
+
+        if (q) {
+
+            sql += `
+                AND (
+                    p.name LIKE ?
+                    OR p.styles LIKE ?
+                    OR p.area LIKE ?
+                )
+            `;
+
+            const keyword = `%${q}%`;
+
+            params.push(
+                keyword,
+                keyword,
+                keyword
+            );
+        }
+
+        if (area) {
+
+            sql += `
+                AND p.area LIKE ?
+            `;
+
+            params.push(
+                `%${area}%`
+            );
+        }
+
+        sql += `
+            ORDER BY
+                p.verified DESC,
+                p.rating DESC,
+                p.id DESC
+        `;
+
+        const [rows] =
+            await pool.query(
+                sql,
+                params
+            );
+
+        res.json(rows);
 
     } catch (error) {
-        console.error("PHOTOGRAPHERS ERROR:", error);
+
+        console.error(
+            "GET /api/photographers:",
+            error
+        );
 
         res.status(500).json({
             success: false,
-            message: "Không lấy được danh sách nhân viên",
+            message:
+                "Không lấy được danh sách Photographer",
             error: error.message
         });
     }
+
 });
-
-
-
 
 
 
