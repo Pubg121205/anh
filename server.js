@@ -161,103 +161,54 @@ app.post("/api/setup-admin", async (req, res) => {
 ========================= */
 
 app.post("/api/login", async (req, res) => {
-
     try {
+        const { username, password } = req.body;
 
-        const {
-            username,
-            password
-        } = req.body;
+        console.log("LOGIN:", username, password);
 
-        if (!username || !password) {
+        const [users] = await pool.query(
+            "SELECT * FROM users WHERE username = ? LIMIT 1",
+            [username]
+        );
 
-            return res.status(400).json({
-                success: false,
-                message:
-                    "Nhập tài khoản và mật khẩu"
-            });
-        }
-
-        const [rows] =
-            await pool.query(
-                `
-                SELECT *
-                FROM users
-                WHERE username=?
-                LIMIT 1
-                `,
-                [username]
-            );
-
-        if (!rows.length) {
-
+        if (users.length === 0) {
             return res.status(401).json({
                 success: false,
-                message:
-                    "Sai tài khoản hoặc mật khẩu"
+                message: "Không tìm thấy tài khoản"
             });
         }
 
-        const user = rows[0];
+        const user = users[0];
 
-        const valid =
-            await bcrypt.compare(
-                password,
-                user.password
-            );
+        console.log("DB USER:", user.username);
+        console.log("DB PASS:", user.password);
 
-        if (!valid) {
-
+        if (String(user.password) !== String(password)) {
             return res.status(401).json({
                 success: false,
-                message:
-                    "Sai tài khoản hoặc mật khẩu"
+                message: "Sai tài khoản hoặc mật khẩu"
             });
         }
-
-        const token =
-            jwt.sign(
-                {
-                    id: user.id,
-                    username:
-                        user.username,
-                    role:
-                        user.role
-                },
-                JWT_SECRET,
-                {
-                    expiresIn: "7d"
-                }
-            );
 
         res.json({
             success: true,
-            token,
-
+            message: "Đăng nhập thành công",
             user: {
                 id: user.id,
-                username:
-                    user.username,
-                role:
-                    user.role,
-                name:
-                    user.name,
-                avatar:
-                    user.avatar
+                username: user.username,
+                role: user.role
             }
         });
 
     } catch (error) {
-
         console.error(error);
 
         res.status(500).json({
             success: false,
-            message: error.message
+            message: "Lỗi server"
         });
     }
 });
-
 
 /* =========================
    AUTH
