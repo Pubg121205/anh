@@ -978,6 +978,52 @@ app.delete(
     }
 );
 
+
+
+// =========================
+// EXPLORE - ẢNH PHOTOGRAPHER
+// =========================
+
+app.get("/api/explore", async (req, res) => {
+    try {
+
+        const [rows] = await pool.query(`
+            SELECT
+                pi.id,
+                pi.image_url,
+                pi.sort_order,
+                p.id AS photographer_id,
+                p.name AS photographer_name,
+                p.avatar AS photographer_avatar,
+                p.area,
+                p.verified
+            FROM photographer_images pi
+
+            INNER JOIN photographers p
+                ON p.id = pi.photographer_id
+
+            WHERE p.verified = 1
+
+            ORDER BY
+                pi.sort_order ASC,
+                pi.id DESC
+        `);
+
+        res.json(rows);
+
+    } catch (error) {
+
+        console.error("EXPLORE ERROR:", error);
+
+        res.status(500).json({
+            success: false,
+            message: "Không lấy được ảnh Explore",
+            error: error.message
+        });
+
+    }
+});
+
 /* =========================
    GET ONE PHOTOGRAPHER
 ========================= */
