@@ -2,12 +2,21 @@ const express = require("express");
 const mysql = require("mysql2/promise");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const cors = require("cors");
 const path = require("path");
 require("dotenv").config();
 
 const app = express();
 
+const cors = require("cors");
+
+app.use(cors({
+    origin: [
+        "https://hoangtusnake.site",
+        "http://localhost:5500",
+        "http://localhost:3000"
+    ],
+    credentials: true
+}));
 app.use(cors());
 app.use(express.json({ limit: "10mb" }));
 
