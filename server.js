@@ -927,7 +927,135 @@ app.post(
 );
 
 
+// Lấy danh sách tài khoản photographer
+app.get("/api/admin/photographer-users", auth, async (req, res) => {
 
+    try {
+
+        if (req.user.role !== "admin") {
+            return res.status(403).json({
+                message: "Không có quyền"
+            });
+        }
+
+        const [users] = await pool.query(`
+            SELECT
+                id,
+                username,
+                name,
+                role
+            FROM users
+            WHERE role = 'photographer'
+            ORDER BY id DESC
+        `);
+
+        const [photographers] = await pool.query(`
+            SELECT
+                id,
+                user_id,
+                name,
+                area
+            FROM photographers
+            ORDER BY id DESC
+        `);
+
+        res.json({
+            users,
+            photographers
+        });
+
+    } catch (error) {
+
+        console.error(error);
+
+        res.status(500).json({
+            message: "Không lấy được dữ liệu"
+        });
+    }
+});
+
+
+app.put("/api/admin/photographer-users/:userId", auth, async (req, res) => {
+
+    try {
+
+        if (req.user.role !== "admin") {
+            return res.status(403).json({
+                message: "Không có quyền"
+            });
+        }
+
+        const userId = req.params.userId;
+        const photographerId =
+            req.body.photographer_id;
+
+        if (!photographerId) {
+            return res.status(400).json({
+                message: "Thiếu Photographer"
+            });
+        }
+
+        // Kiểm tra user
+        const [users] = await pool.query(
+            `
+            SELECT id
+            FROM users
+            WHERE id = ?
+            AND role = 'photographer'
+            `,
+            [userId]
+        );
+
+        if (!users.length) {
+            return res.status(404).json({
+                message: "Không tìm thấy tài khoản Photographer"
+            });
+        }
+
+        // Kiểm tra Photographer
+        const [photographers] = await pool.query(
+            `
+            SELECT id
+            FROM photographers
+            WHERE id = ?
+            `,
+            [photographerId]
+        );
+
+        if (!photographers.length) {
+            return res.status(404).json({
+                message: "Không tìm thấy Photographer"
+            });
+        }
+
+        // Gán user vào profile
+        await pool.query(
+            `
+            UPDATE photographers
+            SET user_id = ?
+            WHERE id = ?
+            `,
+            [
+                userId,
+                photographerId
+            ]
+        );
+
+        res.json({
+            success: true,
+            message: "Đã gán tài khoản với Photographer"
+        });
+
+    } catch (error) {
+
+        console.error(error);
+
+        res.status(500).json({
+            message: "Không thể gán Photographer",
+            error: error.message
+        });
+    }
+});
 
 // =========================
 // XÓA ẢNH PROFILE
@@ -979,6 +1107,191 @@ app.delete(
 );
 
 
+
+
+
+async function loadPhotographerAccounts() {
+
+    const box =
+        document.getElementById(
+            "photographerAccountList"
+        );
+
+    try {
+
+        const data =
+            await api(
+                "/admin/photographer-users"
+            );
+
+        box.innerHTML =
+            data.users.map(user => {
+
+                const current =
+                    data.photographers.find(
+                        p =>
+                            Number(p.user_id) ===
+                            Number(user.id)
+                    );
+
+                return `
+                    <div class="admin-card">
+
+                        <div>
+
+                            <strong>
+                                ${escapeHTML(
+                                    user.name ||
+                                    user.username
+                                )}
+                            </strong>
+
+                            <p>
+                                Username:
+                                ${escapeHTML(
+                                    user.username
+                                )}
+                            </p>
+
+                            <p>
+                                ${
+                                    current
+                                    ? `
+                                    Đang gán:
+                                    <b>
+                                        ${escapeHTML(
+                                            current.name
+                                        )}
+                                    </b>
+                                    `
+                                    :
+                                    `
+                                    <span style="color:#c00">
+                                        Chưa gán Photographer
+                                    </span>
+                                    `
+                                }
+                            </p>
+
+                        </div>
+
+                        <div>
+
+                            <select
+                                id="photographer-${user.id}"
+                            >
+
+                                <option value="">
+                                    -- Chọn Photographer --
+                                </option>
+
+                                ${
+                                    data.photographers
+                                    .map(p => `
+                                        <option
+                                            value="${p.id}"
+                                            ${
+                                                current &&
+                                                Number(current.id) ===
+                                                Number(p.id)
+                                                ? "selected"
+                                                : ""
+                                            }
+                                        >
+                                            #${p.id}
+                                            -
+                                            ${escapeHTML(p.name)}
+                                            ${
+                                                p.area
+                                                ? " - " +
+                                                  escapeHTML(p.area)
+                                                : ""
+                                            }
+                                        </option>
+                                    `)
+                                    .join("")
+                                }
+
+                            </select>
+
+                            <button
+                                class="button"
+                                onclick="
+                                    assignPhotographer(
+                                        ${user.id}
+                                    )
+                                "
+                            >
+                                Gán Profile
+                            </button>
+
+                        </div>
+
+                    </div>
+                `;
+
+            }).join("");
+
+    } catch (error) {
+
+        console.error(error);
+
+        box.innerHTML =
+            `<p class="error">
+                ${escapeHTML(error.message)}
+            </p>`;
+    }
+}
+
+
+
+
+async function assignPhotographer(userId) {
+
+    const select =
+        document.getElementById(
+            `photographer-${userId}`
+        );
+
+    const photographerId =
+        select.value;
+
+    if (!photographerId) {
+
+        alert(
+            "Hãy chọn Photographer"
+        );
+
+        return;
+    }
+
+    try {
+
+        await api(
+            `/admin/photographer-users/${userId}`,
+            {
+                method: "PUT",
+
+                body: JSON.stringify({
+                    photographer_id:
+                        photographerId
+                })
+            }
+        );
+
+        alert(
+            "Đã gán tài khoản với Photographer!"
+        );
+
+        loadPhotographerAccounts();
+
+    } catch (error) {
+
+        alert(
+            error.message
+        );
+    }
+}
 
 // =========================
 // EXPLORE - ẢNH PHOTOGRAPHER
