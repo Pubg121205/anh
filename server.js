@@ -983,10 +983,8 @@ app.delete(
 // =========================
 // EXPLORE - ẢNH PHOTOGRAPHER
 // =========================
-
 app.get("/api/explore", async (req, res) => {
     try {
-
         const [rows] = await pool.query(`
             SELECT
                 pi.id,
@@ -998,12 +996,8 @@ app.get("/api/explore", async (req, res) => {
                 p.area,
                 p.verified
             FROM photographer_images pi
-
             INNER JOIN photographers p
                 ON p.id = pi.photographer_id
-
-            WHERE p.verified = 1
-
             ORDER BY
                 pi.sort_order ASC,
                 pi.id DESC
@@ -1012,7 +1006,6 @@ app.get("/api/explore", async (req, res) => {
         res.json(rows);
 
     } catch (error) {
-
         console.error("EXPLORE ERROR:", error);
 
         res.status(500).json({
@@ -1020,8 +1013,8 @@ app.get("/api/explore", async (req, res) => {
             message: "Không lấy được ảnh Explore",
             error: error.message
         });
-
     }
+});
 });
 
 /* =========================
