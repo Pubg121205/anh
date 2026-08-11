@@ -729,6 +729,191 @@ app.get("/api/photographers", async (req, res) => {
 });
 
 
+
+
+
+
+// =========================
+// GET ẢNH PROFILE
+// =========================
+
+app.get(
+    "/api/profile/images",
+    auth,
+    async (req, res) => {
+
+        try {
+
+            const [rows] = await pool.query(
+                `
+                SELECT
+                    pi.id,
+                    pi.image_url,
+                    pi.sort_order
+                FROM photographer_images pi
+                INNER JOIN photographers p
+                    ON p.id = pi.photographer_id
+                WHERE p.user_id = ?
+                ORDER BY
+                    pi.sort_order ASC,
+                    pi.id ASC
+                `,
+                [req.user.id]
+            );
+
+            res.json(rows);
+
+        } catch (error) {
+
+            console.error(error);
+
+            res.status(500).json({
+                success: false,
+                message: "Không lấy được ảnh"
+            });
+
+        }
+
+    }
+);
+
+
+
+// =========================
+// THÊM ẢNH PROFILE
+// =========================
+
+app.post(
+    "/api/profile/images",
+    auth,
+    async (req, res) => {
+
+        try {
+
+            const {
+                image_url
+            } = req.body;
+
+            if (!image_url) {
+
+                return res.status(400).json({
+                    success: false,
+                    message: "Thiếu URL ảnh"
+                });
+
+            }
+
+            const [photographers] =
+                await pool.query(
+                    `
+                    SELECT id
+                    FROM photographers
+                    WHERE user_id = ?
+                    LIMIT 1
+                    `,
+                    [req.user.id]
+                );
+
+            if (!photographers.length) {
+
+                return res.status(404).json({
+                    success: false,
+                    message:
+                        "Tài khoản chưa có Photographer"
+                });
+
+            }
+
+            const photographerId =
+                photographers[0].id;
+
+            await pool.query(
+                `
+                INSERT INTO photographer_images
+                (
+                    photographer_id,
+                    image_url
+                )
+                VALUES (?, ?)
+                `,
+                [
+                    photographerId,
+                    image_url
+                ]
+            );
+
+            res.json({
+                success: true,
+                message: "Đã thêm ảnh"
+            });
+
+        } catch (error) {
+
+            console.error(error);
+
+            res.status(500).json({
+                success: false,
+                message: "Không thể thêm ảnh",
+                error: error.message
+            });
+
+        }
+
+    }
+);
+
+
+
+
+// =========================
+// XÓA ẢNH PROFILE
+// =========================
+
+app.delete(
+    "/api/profile/images/:id",
+    auth,
+    async (req, res) => {
+
+        try {
+
+            const imageId =
+                req.params.id;
+
+            await pool.query(
+                `
+                DELETE pi
+                FROM photographer_images pi
+                INNER JOIN photographers p
+                    ON p.id = pi.photographer_id
+                WHERE
+                    pi.id = ?
+                    AND p.user_id = ?
+                `,
+                [
+                    imageId,
+                    req.user.id
+                ]
+            );
+
+            res.json({
+                success: true,
+                message: "Đã xóa ảnh"
+            });
+
+        } catch (error) {
+
+            console.error(error);
+
+            res.status(500).json({
+                success: false,
+                message: "Không thể xóa ảnh"
+            });
+
+        }
+
+    }
+);
+
 /* =========================
    GET ONE PHOTOGRAPHER
 ========================= */
