@@ -349,150 +349,159 @@ app.get(
 // PROFILE - UPDATE
 // =========================
 
-app.put(
-    "/api/profile",
-    auth,
-    async (req, res) => {
+app.put("/api/profile", auth, async (req, res) => {
 
-        try {
+    const connection = await pool.getConnection();
 
-            const userId =
-                req.user.id;
+    try {
+
+        await connection.beginTransaction();
+
+        const userId = req.user.id;
+
+        const {
+            name,
+            phone,
+            email,
+            avatar,
+
+            cover,
+            area,
+            price_from,
+            styles,
+            bio,
+            phone_photo,
+            facebook,
+            instagram
+        } = req.body;
 
 
-            const {
-                name,
-                phone,
-                email,
-                avatar,
+        // =========================
+        // 1. UPDATE USERS
+        // =========================
 
-                cover,
-                area,
-                price_from,
-                styles,
-                bio,
-                phone_photo,
-                facebook,
-                instagram
-            } = req.body;
+        await connection.query(
+            `
+            UPDATE users
+            SET
+                name = ?,
+                phone = ?,
+                email = ?,
+                avatar = ?
+            WHERE id = ?
+            `,
+            [
+                name || "",
+                phone || "",
+                email || "",
+                avatar || "",
+                userId
+            ]
+        );
 
 
-            // =========================
-            // UPDATE USERS
-            // =========================
+        // =========================
+        // 2. TÌM PHOTOGRAPHER
+        // =========================
 
-            await pool.query(
+        const [photographers] =
+            await connection.query(
                 `
-                UPDATE users
+                SELECT *
+                FROM photographers
+                WHERE user_id = ?
+                LIMIT 1
+                `,
+                [userId]
+            );
+
+
+        // =========================
+        // 3. UPDATE PHOTOGRAPHER
+        // =========================
+
+        if (photographers.length > 0) {
+
+            const photographer =
+                photographers[0];
+
+            await connection.query(
+                `
+                UPDATE photographers
                 SET
                     name = ?,
+                    avatar = ?,
+                    cover = ?,
+                    area = ?,
+                    price_from = ?,
+                    styles = ?,
+                    bio = ?,
                     phone = ?,
-                    email = ?,
-                    avatar = ?
+                    facebook = ?,
+                    instagram = ?
                 WHERE id = ?
                 `,
                 [
-                    name || "",
-                    phone || "",
-                    email || "",
-                    avatar || "",
-                    userId
+                    name || photographer.name || "",
+                    avatar || photographer.avatar || "",
+                    cover || photographer.cover || "",
+                    area || photographer.area || "",
+                    Number(
+                        price_from ??
+                        photographer.price_from ??
+                        0
+                    ),
+                    styles ?? photographer.styles ?? "",
+                    bio ?? photographer.bio ?? "",
+                    phone_photo ??
+                        photographer.phone ??
+                        "",
+                    facebook ??
+                        photographer.facebook ??
+                        "",
+                    instagram ??
+                        photographer.instagram ??
+                        "",
+
+                    photographer.id
                 ]
             );
 
-
-            // =========================
-            // KIỂM TRA PHOTOGRAPHER
-            // =========================
-
-            const [rows] =
-                await pool.query(
-                    `
-                    SELECT id
-                    FROM photographers
-                    WHERE user_id = ?
-                    LIMIT 1
-                    `,
-                    [userId]
-                );
-
-
-            if (rows.length > 0) {
-
-                // =========================
-                // UPDATE PHOTOGRAPHER
-                // =========================
-
-                await pool.query(
-                    `
-                    UPDATE photographers
-                    SET
-                        name = ?,
-                        avatar = ?,
-                        cover = ?,
-                        area = ?,
-                        price_from = ?,
-                        styles = ?,
-                        bio = ?,
-                        phone = ?,
-                        facebook = ?,
-                        instagram = ?
-                    WHERE user_id = ?
-                    `,
-                    [
-                        name || "",
-                        avatar || "",
-                        cover || "",
-                        area || "",
-                        Number(
-                            price_from || 0
-                        ),
-                        styles || "",
-                        bio || "",
-                        phone_photo || "",
-                        facebook || "",
-                        instagram || "",
-                        userId
-                    ]
-                );
-
-            }
-
-
-            res.json({
-
-                success: true,
-
-                message:
-                    "Cập nhật hồ sơ thành công"
-
-            });
-
-
-        } catch (error) {
-
-            console.error(
-                "UPDATE PROFILE ERROR:",
-                error
-            );
-
-
-            res.status(500).json({
-
-                success: false,
-
-                message:
-                    "Không thể cập nhật hồ sơ",
-
-                error:
-                    error.message
-
-            });
-
         }
 
+
+        await connection.commit();
+
+
+        res.json({
+            success: true,
+            message: "Đã lưu thay đổi"
+        });
+
+
+    } catch (error) {
+
+        await connection.rollback();
+
+        console.error(
+            "PROFILE UPDATE ERROR:",
+            error
+        );
+
+        res.status(500).json({
+            success: false,
+            message: "Không thể lưu thay đổi",
+            error: error.message
+        });
+
+
+    } finally {
+
+        connection.release();
+
     }
-);
+
+});
 /* =========================
    AUTH
 ========================= */
