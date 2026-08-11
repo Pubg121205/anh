@@ -1,6 +1,5 @@
 const express = require("express");
 const mysql = require("mysql2/promise");
-const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const path = require("path");
 require("dotenv").config();
@@ -162,54 +161,81 @@ app.post("/api/setup-admin", async (req, res) => {
 
 app.post("/api/login", async (req, res) => {
     try {
+
         const { username, password } = req.body;
 
-        console.log("LOGIN:", username, password);
-
-        const [users] = await pool.query(
-            "SELECT * FROM users WHERE username = ? LIMIT 1",
-            [username]
-        );
-
-        if (users.length === 0) {
-            return res.status(401).json({
+        if (!username || !password) {
+            return res.status(400).json({
                 success: false,
-                message: "Không tìm thấy tài khoản"
+                message: "Vui lòng nhập tài khoản và mật khẩu"
             });
         }
 
-        const user = users[0];
+        const [rows] = await pool.query(
+            `
+            SELECT *
+            FROM users
+            WHERE username = ?
+            LIMIT 1
+            `,
+            [username]
+        );
 
-        console.log("DB USER:", user.username);
-        console.log("DB PASS:", user.password);
-
-        if (String(user.password) !== String(password)) {
+        if (rows.length === 0) {
             return res.status(401).json({
                 success: false,
                 message: "Sai tài khoản hoặc mật khẩu"
             });
         }
 
+        const user = rows[0];
+
+        // KHÔNG MÃ HÓA
+        if (user.password !== password) {
+            return res.status(401).json({
+                success: false,
+                message: "Sai tài khoản hoặc mật khẩu"
+            });
+        }
+
+        // Tạo token đăng nhập
+        const token = jwt.sign(
+            {
+                id: user.id,
+                username: user.username,
+                role: user.role
+            },
+            JWT_SECRET,
+            {
+                expiresIn: "7d"
+            }
+        );
+
         res.json({
             success: true,
             message: "Đăng nhập thành công",
+
+            token: token,
+
             user: {
                 id: user.id,
                 username: user.username,
+                name: user.name,
                 role: user.role
             }
         });
 
     } catch (error) {
-        console.error(error);
+
+        console.error("LOGIN ERROR:", error);
 
         res.status(500).json({
             success: false,
-            message: "Lỗi server"
+            message: "Lỗi server",
+            error: error.message
         });
     }
 });
-
 /* =========================
    AUTH
 ========================= */
@@ -277,7 +303,134 @@ function adminOnly(req, res, next) {
     next();
 }
 
+// =========================
+// ADMIN - THÊM NHÂN VIÊN
+// =========================
 
+app.post(
+    "/api/admin/users",
+    auth,
+    adminOnly,
+    async (req, res) => {
+
+        try {
+
+            const {
+                username,
+                password,
+                name,
+                phone,
+                email,
+                role,
+                avatar
+            } = req.body;
+
+            // Kiểm tra dữ liệu
+            if (!username || !password || !name) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Vui lòng nhập tài khoản, mật khẩu và họ tên"
+                });
+            }
+
+            // Kiểm tra tài khoản đã tồn tại
+            const [exists] = await pool.query(
+                "SELECT id FROM users WHERE username = ? LIMIT 1",
+                [username]
+            );
+
+            if (exists.length > 0) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Tài khoản đã tồn tại"
+                });
+            }
+
+            // =========================
+            // THÊM USER
+            // =========================
+
+            const [result] = await pool.query(
+                `
+                INSERT INTO users
+                (
+                    username,
+                    password,
+                    name,
+                    phone,
+                    email,
+                    role,
+                    avatar
+                )
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+                `,
+                [
+                    username,
+                    password,
+                    name,
+                    phone || "",
+                    email || "",
+                    role || "photographer",
+                    avatar || ""
+                ]
+            );
+
+            const userId = result.insertId;
+
+            // =========================
+            // NẾU LÀ PHOTOGRAPHER
+            // TẠO THÔNG TIN HIỂN THỊ
+            // =========================
+
+            if (role === "photographer") {
+
+                await pool.query(
+                    `
+                    INSERT INTO photographers
+                    (
+                        user_id,
+                        name,
+                        avatar,
+                        rating,
+                        shoots,
+                        price_from,
+                        verified
+                    )
+                    VALUES (?, ?, ?, ?, ?, ?, ?)
+                    `,
+                    [
+                        userId,
+                        name,
+                        avatar || "",
+                        5,
+                        0,
+                        0,
+                        0
+                    ]
+                );
+            }
+
+            res.json({
+                success: true,
+                message: "Thêm nhân viên thành công",
+                id: userId
+            });
+
+        } catch (error) {
+
+            console.error(
+                "ADD USER ERROR:",
+                error
+            );
+
+            res.status(500).json({
+                success: false,
+                message: "Không thể thêm nhân viên",
+                error: error.message
+            });
+        }
+    }
+);
 /* =========================
    GET PHOTOGRAPHERS
 ========================= */
