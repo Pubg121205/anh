@@ -236,6 +236,114 @@ app.post("/api/login", async (req, res) => {
         });
     }
 });
+
+
+app.get(
+    "/api/profile",
+    auth,
+    async (req, res) => {
+
+        try {
+
+            const [users] =
+                await pool.query(
+                    `
+                    SELECT
+                        id,
+                        username,
+                        name,
+                        phone,
+                        email,
+                        role,
+                        avatar
+                    FROM users
+                    WHERE id = ?
+                    LIMIT 1
+                    `,
+                    [req.user.id]
+                );
+
+
+            if (users.length === 0) {
+
+                return res.status(404).json({
+                    success: false,
+                    message: "Không tìm thấy tài khoản"
+                });
+
+            }
+
+
+            const user =
+                users[0];
+
+
+            let photographer = null;
+
+
+            if (
+                user.role ===
+                "photographer"
+            ) {
+
+                const [rows] =
+                    await pool.query(
+                        `
+                        SELECT *
+                        FROM photographers
+                        WHERE user_id = ?
+                        LIMIT 1
+                        `,
+                        [user.id]
+                    );
+
+
+                if (rows.length > 0) {
+
+                    photographer =
+                        rows[0];
+
+                }
+
+            }
+
+
+            res.json({
+
+                success: true,
+
+                user: user,
+
+                photographer:
+                    photographer
+
+            });
+
+
+        } catch (error) {
+
+            console.error(
+                "PROFILE ERROR:",
+                error
+            );
+
+
+            res.status(500).json({
+
+                success: false,
+
+                message:
+                    "Không lấy được thông tin tài khoản",
+
+                error:
+                    error.message
+
+            });
+
+        }
+
+    }
+);
 /* =========================
    AUTH
 ========================= */
