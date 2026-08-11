@@ -281,59 +281,42 @@ function adminOnly(req, res, next) {
 /* =========================
    GET PHOTOGRAPHERS
 ========================= */
+app.get("/api/photographers", async (req, res) => {
+    try {
+        const [rows] = await pool.query(`
+            SELECT
+                p.id,
+                p.user_id,
+                p.name,
+                p.avatar,
+                p.area,
+                p.rating,
+                p.shoots,
+                p.styles,
+                p.price_from,
+                p.verified
+            FROM photographers p
+            INNER JOIN users u
+                ON p.user_id = u.id
+            WHERE u.role = 'photographer'
+            ORDER BY p.id DESC
+        `);
 
-app.get(
-    "/api/photographers",
-    async (req, res) => {
+        res.json({
+            success: true,
+            photographers: rows
+        });
 
-        try {
+    } catch (error) {
+        console.error("PHOTOGRAPHERS ERROR:", error);
 
-            const q =
-                req.query.q || "";
-
-            const area =
-                req.query.area || "";
-
-            const [rows] =
-                await pool.query(
-                    `
-                    SELECT *
-                    FROM photographers
-                    WHERE
-                    (
-                        ? = ''
-                        OR name LIKE CONCAT('%', ?, '%')
-                        OR styles LIKE CONCAT('%', ?, '%')
-                    )
-                    AND
-                    (
-                        ? = ''
-                        OR area LIKE CONCAT('%', ?, '%')
-                    )
-                    ORDER BY id DESC
-                    `,
-                    [
-                        q,
-                        q,
-                        q,
-                        area,
-                        area
-                    ]
-                );
-
-            res.json(rows);
-
-        } catch (error) {
-
-            console.error(error);
-
-            res.status(500).json({
-                success: false,
-                message: error.message
-            });
-        }
+        res.status(500).json({
+            success: false,
+            message: "Không lấy được danh sách nhân viên",
+            error: error.message
+        });
     }
-);
+});
 
 
 /* =========================
